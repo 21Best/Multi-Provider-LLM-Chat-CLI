@@ -3,12 +3,15 @@ from azure.ai.inference.models import AssistantMessage, SystemMessage, UserMessa
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
 from groq import Groq
+from sentiment_analysis import predict_sentiment
 import os
 import json
 load_dotenv()
 
 
-conversation = [{"role":"system", "content":"You are a customer care service bot"}]
+
+
+conversation = [{"role":"system", "content":'You are a customer care service bot.'}]
 
 class LLMProvider:
     def __init__(self, model_name):
@@ -90,6 +93,16 @@ finally:
             
                 
             user_input = input("Enter your message: ")
+            sentiment = predict_sentiment(user_input)
+            conversation[0]["content"] = (
+                f"You are a customer care service bot. "
+                f"The customer's sentiment is {sentiment}. "
+                "If the sentiment is negative, respond with empathy and apologize for the inconvenience. "
+                "If the sentiment is positive, respond warmly and appreciatively. "
+                "If the sentiment is neutral, respond normally and helpfully."
+            )
+
+
             user_dict = {"role":"user", "content": user_input}
             conversation.append(user_dict)
 
@@ -99,7 +112,7 @@ finally:
             ai_dict = {"role":"assistant", "content":ai_response}
             conversation.append(ai_dict)
 
-            with open ("C:\\Users\\USER\\Documents\\LLM Projects\\conversation.json", "w") as f:
+            with open ("C:\\Users\\USER\\Documents\\Multi-Provider LLM Chat\\conversation.json", "w") as f:
                 data = json.dump(conversation, f)
     
 
